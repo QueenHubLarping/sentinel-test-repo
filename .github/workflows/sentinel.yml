@@ -1,0 +1,37 @@
+# Run Sentinel on every pull request to this repo.
+#
+# Sentinel reads this repo's docs/adr/ as its memory, then checks the incoming PR's
+# diff against those decisions and comments if the PR reverses one.
+#
+# Requirements (one-time):
+#   1. A SELF-HOSTED runner with Ollama running and the embedding model pulled:
+#        ollama serve
+#        ollama pull nomic-embed-text
+#   2. A repo Actions secret GROQ_API_KEY (Settings -> Secrets -> Actions).
+#
+# Starts in dry-run (comment printed to the job summary only). Switch mode to "post"
+# to have Sentinel comment directly on the PR.
+
+name: Sentinel
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  pull-requests: write   # needed for mode: post
+  contents: read
+
+jobs:
+  sentinel:
+    runs-on: self-hosted   # the machine running Ollama
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history so the PR diff is available
+
+      - name: Run Sentinel
+        uses: Notchayan/sentinel-hq@main
+        with:
+          mode: dry-run     # change to "post" to comment on the PR
+          groq-api-key: ${{ secrets.GROQ_API_KEY }}
