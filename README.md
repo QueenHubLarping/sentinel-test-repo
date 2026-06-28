@@ -19,7 +19,7 @@ institutional memory and flags any PR that silently reverses one of them.
 ## How Sentinel runs here
 
 [`.github/workflows/sentinel.yml`](.github/workflows/sentinel.yml) runs the published
-Sentinel action (`Notchayan/sentinel-hq`) on every pull request. On first run it
+Sentinel action (`Notchayan/sentinel-hq@main`) on every pull request. On first run it
 ingests this repo's `docs/adr/` into its memory graph, then judges the incoming PR's
 diff against those decisions and comments if the PR reverses one.
 

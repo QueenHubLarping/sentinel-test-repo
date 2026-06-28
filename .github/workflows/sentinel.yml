@@ -31,10 +31,7 @@ jobs:
           fetch-depth: 0   # full history so the PR diff is available
 
       - name: Run Sentinel
-        # The Action currently lives on this branch (origin/main is behind and has
-        # no action.yml). Switch to @main — or a release tag like @v0.1 — once the
-        # branch is merged.
-        uses: Notchayan/sentinel-hq@feat/local-selfhost-ollama
+        uses: Notchayan/sentinel-hq@main
         with:
           mode: dry-run     # change to "post" to comment on the PR
           groq-api-key: ${{ secrets.GROQ_API_KEY }}
