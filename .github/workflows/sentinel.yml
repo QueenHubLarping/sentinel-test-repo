@@ -33,5 +33,5 @@ jobs:
       - name: Run Sentinel
         uses: QueenHubLarping/sentinel-hq@main
         with:
-          mode: dry-run     # change to "post" to comment on the PR
+          mode: post        # comment directly on the PR
           groq-api-key: ${{ secrets.GROQ_API_KEY }}
