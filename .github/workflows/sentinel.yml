@@ -31,7 +31,7 @@ jobs:
           fetch-depth: 0   # full history so the PR diff is available
 
       - name: Run Sentinel
-        uses: Notchayan/sentinel-hq@main
+        uses: QueenHubLarping/sentinel-hq@main
         with:
           mode: dry-run     # change to "post" to comment on the PR
           groq-api-key: ${{ secrets.GROQ_API_KEY }}

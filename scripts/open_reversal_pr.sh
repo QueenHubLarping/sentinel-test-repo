@@ -10,7 +10,7 @@
 #
 set -euo pipefail
 
-REPO="Notchayan/sentinel-test-repo"
+REPO="QueenHubLarping/sentinel-test-repo"
 BASE="main"
 HEAD="reverse-async-email"
 : "${GITHUB_TOKEN:?Set GITHUB_TOKEN to a PAT with 'repo' scope}"
