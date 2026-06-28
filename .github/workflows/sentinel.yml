@@ -1,37 +1,55 @@
-# Run Sentinel on every pull request to this repo.
+# Sentinel on this repo.
 #
-# Sentinel reads this repo's docs/adr/ as its memory, then checks the incoming PR's
-# diff against those decisions and comments if the PR reverses one.
+#  • On every PR  → detect: read docs/adr/ as memory, judge the diff, comment if the
+#    PR reverses a past decision.
+#  • On a comment "/sentinel intentional" → resolve: retire that decision (mark the ADR
+#    Superseded in docs/adr on the PR branch) so Sentinel stops flagging it.
 #
 # Requirements (one-time):
 #   1. A SELF-HOSTED runner with Ollama running and the embedding model pulled:
-#        ollama serve
-#        ollama pull nomic-embed-text
+#        ollama serve && ollama pull nomic-embed-text
 #   2. A repo Actions secret GROQ_API_KEY (Settings -> Secrets -> Actions).
-#
-# Starts in dry-run (comment printed to the job summary only). Switch mode to "post"
-# to have Sentinel comment directly on the PR.
 
 name: Sentinel
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  issue_comment:
+    types: [created]
 
 permissions:
-  pull-requests: write   # needed for mode: post
-  contents: read
+  pull-requests: write   # comment on the PR
+  contents: write        # resolve commits the ADR supersession to the PR branch
 
 jobs:
-  sentinel:
-    runs-on: self-hosted   # the machine running Ollama
+  # ---- detect: runs on pull_request events ----
+  detect:
+    if: github.event_name == 'pull_request'
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0   # full history so the PR diff is available
-
-      - name: Run Sentinel
+      - name: Run Sentinel (detect)
         uses: QueenHubLarping/sentinel-hq@main
         with:
-          mode: post        # comment directly on the PR
+          mode: post
+          groq-api-key: ${{ secrets.GROQ_API_KEY }}
+
+  # ---- resolve: runs when someone comments "/sentinel intentional" on a PR ----
+  resolve:
+    if: >-
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/sentinel intentional')
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run Sentinel (resolve / forget loop)
+        uses: QueenHubLarping/sentinel-hq@main
+        with:
+          mode: post
           groq-api-key: ${{ secrets.GROQ_API_KEY }}
