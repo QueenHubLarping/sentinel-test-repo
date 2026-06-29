@@ -8,9 +8,10 @@
 #    in .sentinel-dismissed on the PR branch) so Sentinel stops raising it.
 #
 # Requirements (one-time):
-#   A SELF-HOSTED runner with Ollama running and both models pulled — fully local
-#   reasoning + embeddings, no cloud, no API key, no rate limits:
-#        ollama serve && ollama pull qwen2.5:3b nomic-embed-text
+#   A SELF-HOSTED runner with Ollama running for LOCAL EMBEDDINGS:
+#        ollama serve && ollama pull nomic-embed-text
+#   Reasoning runs on OpenAI gpt-4o-mini (fast, cheap, no CPU bottleneck). Set the
+#   repo secret OPENAI_API_KEY. The graph store + embeddings stay local on the box.
 
 name: Sentinel
 
@@ -38,7 +39,10 @@ jobs:
         uses: QueenHubLarping/sentinel-hq@main
         with:
           mode: post
-          llm-model: qwen2.5:3b   # fully local reasoning on the GPU runner
+          llm-provider: openai
+          llm-model: gpt-4o-mini
+          llm-endpoint: ""          # ignored for openai (hits api.openai.com)
+          llm-api-key: ${{ secrets.OPENAI_API_KEY }}
 
   # ---- forget: runs when someone comments "/sentinel intentional" on a PR ----
   resolve:
@@ -55,7 +59,10 @@ jobs:
         uses: QueenHubLarping/sentinel-hq@main
         with:
           mode: post
-          llm-model: qwen2.5:3b
+          llm-provider: openai
+          llm-model: gpt-4o-mini
+          llm-endpoint: ""
+          llm-api-key: ${{ secrets.OPENAI_API_KEY }}
 
   # ---- improve: runs when someone comments "/sentinel noise" on a PR ----
   noise:
@@ -72,4 +79,7 @@ jobs:
         uses: QueenHubLarping/sentinel-hq@main
         with:
           mode: post
-          llm-model: qwen2.5:3b
+          llm-provider: openai
+          llm-model: gpt-4o-mini
+          llm-endpoint: ""
+          llm-api-key: ${{ secrets.OPENAI_API_KEY }}
