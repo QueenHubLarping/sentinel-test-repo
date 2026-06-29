@@ -1,17 +1,10 @@
-"""
-Checkout endpoint.
-
-ADR-001: the confirmation email is handed to a background Celery queue, not sent
-inline. The endpoint writes the order, enqueues the email, and returns 200 right
-away — keeping the ~800ms SMTP call off the checkout critical path (p95 540ms, not
-1340ms). Do NOT add a synchronous send_email_smtp(...) call here.
-"""
+"""Checkout endpoint — send the confirmation email inline (simpler, one fewer service)."""
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from checkout.tasks import send_order_confirmation_task
+from email_service.smtp import send_email_smtp
 from orders.services import create_order
 
 
@@ -19,9 +12,5 @@ from orders.services import create_order
 @permission_classes([IsAuthenticated])
 def checkout(request):
     order = create_order(request.user, request.data["cart"])
-
-    # ADR-001: hand the confirmation email to the background queue. Keeps the
-    # blocking SMTP call out of the request path. See checkout/tasks.py.
-    send_order_confirmation_task.delay(order.id)
-
+    send_email_smtp(order.user.email, f"Order {order.id} confirmed")  # inline send
     return Response({"order_id": order.id, "status": "confirmed"}, status=201)
