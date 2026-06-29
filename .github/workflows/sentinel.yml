@@ -2,13 +2,15 @@
 #
 #  • On every PR  → detect: read docs/adr/ as memory, judge the diff, comment if the
 #    PR reverses a past decision.
-#  • On a comment "/sentinel intentional" → resolve: retire that decision (mark the ADR
+#  • Comment "/sentinel intentional" → forget: retire that decision (mark the ADR
 #    Superseded in docs/adr on the PR branch) so Sentinel stops flagging it.
+#  • Comment "/sentinel noise" → improve: dismiss this flag as noise (record the drift
+#    in .sentinel-dismissed on the PR branch) so Sentinel stops raising it.
 #
 # Requirements (one-time):
-#   1. A SELF-HOSTED runner with Ollama running and the embedding model pulled:
-#        ollama serve && ollama pull nomic-embed-text
-#   2. A repo Actions secret GROQ_API_KEY (Settings -> Secrets -> Actions).
+#   A SELF-HOSTED runner with Ollama running and both models pulled — fully local
+#   reasoning + embeddings, no cloud, no API key, no rate limits:
+#        ollama serve && ollama pull qwen2.5:7b nomic-embed-text
 
 name: Sentinel
 
@@ -20,7 +22,8 @@ on:
 
 permissions:
   pull-requests: write   # comment on the PR
-  contents: write        # resolve commits the ADR supersession to the PR branch
+  issues: write          # comment via the issue_comment flow
+  contents: write        # forget/improve commit to the PR branch (ADR status / dismissal)
 
 jobs:
   # ---- detect: runs on pull_request events ----
@@ -35,9 +38,9 @@ jobs:
         uses: QueenHubLarping/sentinel-hq@main
         with:
           mode: post
-          groq-api-key: ${{ secrets.GROQ_API_KEY }}
+          llm-model: qwen2.5:7b   # fully local reasoning on the GPU runner
 
-  # ---- resolve: runs when someone comments "/sentinel intentional" on a PR ----
+  # ---- forget: runs when someone comments "/sentinel intentional" on a PR ----
   resolve:
     if: >-
       github.event_name == 'issue_comment' &&
@@ -52,4 +55,21 @@ jobs:
         uses: QueenHubLarping/sentinel-hq@main
         with:
           mode: post
-          groq-api-key: ${{ secrets.GROQ_API_KEY }}
+          llm-model: qwen2.5:7b
+
+  # ---- improve: runs when someone comments "/sentinel noise" on a PR ----
+  noise:
+    if: >-
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/sentinel noise')
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run Sentinel (noise / improve loop)
+        uses: QueenHubLarping/sentinel-hq@main
+        with:
+          mode: post
+          llm-model: qwen2.5:7b
