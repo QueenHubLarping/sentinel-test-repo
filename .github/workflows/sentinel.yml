@@ -10,7 +10,7 @@
 # Requirements (one-time):
 #   A SELF-HOSTED runner with Ollama running and both models pulled — fully local
 #   reasoning + embeddings, no cloud, no API key, no rate limits:
-#        ollama serve && ollama pull qwen2.5:7b nomic-embed-text
+#        ollama serve && ollama pull qwen2.5:3b nomic-embed-text
 
 name: Sentinel
 
@@ -38,7 +38,7 @@ jobs:
         uses: QueenHubLarping/sentinel-hq@main
         with:
           mode: post
-          llm-model: qwen2.5:7b   # fully local reasoning on the GPU runner
+          llm-model: qwen2.5:3b   # fully local reasoning on the GPU runner
 
   # ---- forget: runs when someone comments "/sentinel intentional" on a PR ----
   resolve:
@@ -55,7 +55,7 @@ jobs:
         uses: QueenHubLarping/sentinel-hq@main
         with:
           mode: post
-          llm-model: qwen2.5:7b
+          llm-model: qwen2.5:3b
 
   # ---- improve: runs when someone comments "/sentinel noise" on a PR ----
   noise:
@@ -72,4 +72,4 @@ jobs:
         uses: QueenHubLarping/sentinel-hq@main
         with:
           mode: post
-          llm-model: qwen2.5:7b
+          llm-model: qwen2.5:3b
