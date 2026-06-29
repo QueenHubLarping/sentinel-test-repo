@@ -1,6 +1,6 @@
 # ADR-001: Use Asynchronous Email Dispatch via Queue
 
-**Status:** Accepted  
+**Status:** Superseded (intentional override in #4)
 **Date:** 2024-08-14  
 **Author:** @priya-sharma  
 **Component:** email_service  
