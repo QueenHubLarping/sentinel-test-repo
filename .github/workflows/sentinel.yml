@@ -1,17 +1,12 @@
-# Sentinel on this repo.
+# Sentinel on this repo — fully on GitHub, fully on OpenAI (no self-hosted runner, no Ollama).
 #
-#  • On every PR  → detect: read docs/adr/ as memory, judge the diff, comment if the
-#    PR reverses a past decision.
-#  • Comment "/sentinel intentional" → forget: retire that decision (mark the ADR
-#    Superseded in docs/adr on the PR branch) so Sentinel stops flagging it.
-#  • Comment "/sentinel noise" → improve: dismiss this flag as noise (record the drift
-#    in .sentinel-dismissed on the PR branch) so Sentinel stops raising it.
+#  • PR opened/updated → detect: reconstruct the team's memory and post a Memory Review card
+#    if the PR supersedes a past engineering decision.
+#  • Comment "/sentinel intentional" → forget: retire that decision so Sentinel stops flagging it.
+#  • Comment "/sentinel noise"       → improve: dismiss the flag as noise.
 #
-# Requirements (one-time):
-#   A SELF-HOSTED runner with Ollama running for LOCAL EMBEDDINGS:
-#        ollama serve && ollama pull nomic-embed-text
-#   Reasoning runs on OpenAI gpt-4o-mini (fast, cheap, no CPU bottleneck). Set the
-#   repo secret OPENAI_API_KEY. The graph store + embeddings stay local on the box.
+# Memory is the API-sourced snapshot committed at .sentinel/api_snapshot.json. Set the repo
+# secret OPENAI_API_KEY (reasoning gpt-4o-mini + embeddings text-embedding-3-small).
 
 name: Sentinel
 
@@ -22,40 +17,42 @@ on:
     types: [created]
 
 permissions:
-  pull-requests: write   # comment on the PR
-  issues: write          # comment via the issue_comment flow
-  contents: write        # forget/improve commit to the PR branch (ADR status / dismissal)
+  pull-requests: write
+  issues: write
+  contents: write
 
 jobs:
-  # ---- detect: runs on pull_request events ----
   detect:
     if: github.event_name == 'pull_request'
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # full history so the PR diff is available
+          fetch-depth: 0
       - name: Run Sentinel (detect)
         uses: QueenHubLarping/sentinel-hq@main
         with:
           mode: post
           llm-provider: openai
           llm-model: gpt-4o-mini
-          llm-endpoint: ""          # ignored for openai (hits api.openai.com)
+          llm-endpoint: ""
           llm-api-key: ${{ secrets.OPENAI_API_KEY }}
+          embedding-provider: openai
+          embedding-model: text-embedding-3-small
+          embedding-dimensions: "1536"
+          embedding-api-key: ${{ secrets.OPENAI_API_KEY }}
 
-  # ---- forget: runs when someone comments "/sentinel intentional" on a PR ----
   resolve:
     if: >-
       github.event_name == 'issue_comment' &&
       github.event.issue.pull_request &&
       contains(github.event.comment.body, '/sentinel intentional')
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Run Sentinel (resolve / forget loop)
+      - name: Run Sentinel (resolve / forget)
         uses: QueenHubLarping/sentinel-hq@main
         with:
           mode: post
@@ -63,19 +60,22 @@ jobs:
           llm-model: gpt-4o-mini
           llm-endpoint: ""
           llm-api-key: ${{ secrets.OPENAI_API_KEY }}
+          embedding-provider: openai
+          embedding-model: text-embedding-3-small
+          embedding-dimensions: "1536"
+          embedding-api-key: ${{ secrets.OPENAI_API_KEY }}
 
-  # ---- improve: runs when someone comments "/sentinel noise" on a PR ----
   noise:
     if: >-
       github.event_name == 'issue_comment' &&
       github.event.issue.pull_request &&
       contains(github.event.comment.body, '/sentinel noise')
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Run Sentinel (noise / improve loop)
+      - name: Run Sentinel (noise / improve)
         uses: QueenHubLarping/sentinel-hq@main
         with:
           mode: post
@@ -83,3 +83,7 @@ jobs:
           llm-model: gpt-4o-mini
           llm-endpoint: ""
           llm-api-key: ${{ secrets.OPENAI_API_KEY }}
+          embedding-provider: openai
+          embedding-model: text-embedding-3-small
+          embedding-dimensions: "1536"
+          embedding-api-key: ${{ secrets.OPENAI_API_KEY }}
