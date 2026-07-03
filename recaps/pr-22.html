@@ -84,7 +84,7 @@ footer b { color:var(--purple); }
     <h1>🛡️ Sentinel · Visual Memory Recap</h1>
     <span class="chip purple">Messaging</span>
     <span class="chip red">supersedes a learning</span>
-    <span class="chip">machine-inferred belief</span>
+    <span class="chip">human-approved belief</span>
     <span class="chip gray">QueenHubLarping/sentinel-test-repo</span>
     
   </div>
@@ -106,7 +106,7 @@ footer b { color:var(--purple); }
 <span class="ln file">--- a/checkout/views.py</span>
 <span class="ln file">+++ b/checkout/views.py</span>
 <span class="ln hunk">@@ def checkout(request):</span>
-<div class="annot">⛔ <b>Memory conflict:</b> the removed lines undo <b>PR #57 (synchronous email)</b> — <i>The mail provider call must come off the critical path. The shopper should get an instant reply the moment the purchase is durably recorded; everything the…</i></div>
+<div class="annot">⛔ <b>Memory conflict:</b> the removed lines undo <b>PR #21 (email processing)</b> — <i>The lesson learned was that &quot;callback endpoints acknowledge instantly and defer the work&quot; to ensure adherence to the provider&#x27;s deadline, which led to the…</i></div>
 <span class="ln ctx">         order = create_order(request.user, request.cart)</span>
 <span class="ln del">-        # hand off email to the background queue</span>
 <span class="ln del">-        send_order_confirmation_task.delay(order.id)</span>
@@ -121,11 +121,7 @@ footer b { color:var(--purple); }
 <span class="ln del">-def send_order_confirmation_task(self, order_id):</span>
 <span class="ln del">-    ...</span>
 </div>
-      <div class="pad note"># PR #57: Simplify checkout — send confirmation email synchronously
-
-
-
-The Celery + Redis setup for sending confirmation emails feels like overkill and
+      <div class="pad note">The Celery + Redis setup for sending confirmation emails feels like overkill and
 adds moving parts to deploy. This PR simplifies it: the checkout endpoint now sends
 the confirmation email directly via SendGrid SMTP, inline, before returning. One
 fewer service to run, easier to reason about.</div>
@@ -133,13 +129,13 @@ fewer service to run, easier to reason about.</div>
     <div class="panel">
       <h2>What your organization currently believes</h2>
       <div class="pad">
-        <div class="belief-quote">The mail provider call must come off the critical path. The shopper should get an instant reply the moment the purchase is durably recorded; everything the shopper does not need to wait for (notifying them by mail) happens afterward, out of band, with retry and observability...</div>
-        <div class="kv"><span class="k">This holds only while</span>the mail provider call cost ~800ms on the critical path; shopper conversions fall significantly past 1.2s response time.</div>
+        <div class="belief-quote">The lesson learned was that &quot;callback endpoints acknowledge instantly and defer the work&quot; to ensure adherence to the provider&#x27;s deadline, which led to the decision to process emails directly within the checkout endpoint.</div>
+        <div class="kv"><span class="k">This holds only while</span>callback processing must remain under strict adherence to deadlines to avoid duplicate states during peak times</div>
         <div class="kv"><span class="k">Reconstructed via</span>
-          <span class="chain">PR #57 (simplifies email sending) -&gt; Issue #8 (latency incident)</span></div>
+          <span class="chain">PR #21 (email processing) -&gt; Issue #13 (duplicate states incident)</span></div>
         <div class="kv"><span class="k">Memory impact</span>
-          ⚠️ This PR would <b>supersede</b> PR #57 (synchronous email).</div>
-        <div class="kv"><span class="k">If merged</span>reintroduces ~800ms of latency to the purchase flow, potentially lowering conversion rates during peak traffic situations.</div>
+          ⚠️ This PR would <b>supersede</b> PR #21 (email processing).</div>
+        <div class="kv"><span class="k">If merged</span>reintroduces the risk of timeout issues during the checkout process, potentially leading to duplicate order states under heavy load.</div>
         <p class="note">no shared keywords, no #ref from this PR — recovered by graph + semantic reasoning</p>
       </div>
     </div>
@@ -160,8 +156,8 @@ fewer service to run, easier to reason about.</div>
 <path id="st0-e-hop0-hop1" class="edge" data-src="hop0" data-dst="hop1" d="M515,270 Q459,176 403,110"/><text class="edge-label" x="459" y="172" text-anchor="middle">justified by</text>
 <path id="st0-e-hop0-cap" class="edge" data-src="hop0" data-dst="cap" d="M515,270 Q459,336 403,430"/><text class="edge-label" x="459" y="332" text-anchor="middle">governs</text>
 <g id="st0-inc" class="node" data-state="0" data-nid="inc"><circle cx="120" cy="270" r="30" fill="#dc2626" stroke="#dc2626" fill-opacity="0.22"/><text x="120" y="232" text-anchor="middle">🔻 Simplify checkout — send confirmat</text><text class="sub" x="120" y="314" text-anchor="middle">incoming</text></g>
-<g id="st0-hop0" class="node" data-state="0" data-nid="hop0"><circle cx="515" cy="270" r="30" fill="#7c3aed" stroke="#7c3aed" fill-opacity="0.22"/><text x="515" y="232" text-anchor="middle">🛡️ PR #57 (simplifies Email Sending)</text><text class="sub" x="515" y="314" text-anchor="middle">decision</text></g>
-<g id="st0-hop1" class="node" data-state="0" data-nid="hop1"><circle cx="403" cy="110" r="22" fill="#16a34a" stroke="#16a34a" fill-opacity="0.22"/><text x="403" y="80" text-anchor="middle">🐛 Issue #8 (latency Incident)</text><text class="sub" x="403" y="146" text-anchor="middle">issue</text></g>
+<g id="st0-hop0" class="node" data-state="0" data-nid="hop0"><circle cx="515" cy="270" r="30" fill="#7c3aed" stroke="#7c3aed" fill-opacity="0.22"/><text x="515" y="232" text-anchor="middle">🛡️ PR #21 (email Processing)</text><text class="sub" x="515" y="314" text-anchor="middle">decision</text></g>
+<g id="st0-hop1" class="node" data-state="0" data-nid="hop1"><circle cx="403" cy="110" r="22" fill="#16a34a" stroke="#16a34a" fill-opacity="0.22"/><text x="403" y="80" text-anchor="middle">🐛 Issue #13 (duplicate States Incide</text><text class="sub" x="403" y="146" text-anchor="middle">issue</text></g>
 <g id="st0-cap" class="node" data-state="0" data-nid="cap"><circle cx="403" cy="430" r="22" fill="#0891b2" stroke="#0891b2" fill-opacity="0.22"/><text x="403" y="400" text-anchor="middle">⚙️ Messaging</text><text class="sub" x="403" y="466" text-anchor="middle">tech</text></g>
 </g>
   </svg>
@@ -175,13 +171,13 @@ recall (Cognee) is what connects them.</p>
 
 
   <details><summary>🔎 How Sentinel reconstructed this</summary>
-  <div class="pad">removes background email task via Celery, adds direct synchronous SMTP email send in the checkout process. The MEMORY CONTEXT emphasized that the mail provider call must come off the critical path due to significant latency causing a drop in purchase completions. The decision was made to simplify the flow and avoid blocking the shopper with pending email notifications.</div></details>
+  <div class="pad">removes the background email task processing via Celery, adds synchronous email sending through SendGrid SMTP. The MEMORY CONTEXT decided to process emails asynchronously in the background to avoid blocking the checkout processing, which could lead to timeout-based issues such as duplicate order states. The PR&#x27;s effect reverses this decision by reverting back to synchronous processing in the checkout endpoint.</div></details>
 
   <footer>🛡️ <b>Sentinel</b> — every element on this page is <b>retrieved memory</b>
   (Cognee graph + vector recall), not a re-reading of the diff · remember / recall / improve / forget</footer>
 </div>
 <script>
-const RECAP = {"states": [{"path": ["inc", "hop0", "hop1"], "captions": ["1 \u00b7 The incoming change: Simplify checkout \u2014 send confirmat", "2 \u00b7 Semantic recall matches the governing decision: PR #57 (simplifies Email Sending)", "3 \u00b7 A typed graph edge reaches the rationale: Issue #8 (latency Incident) \u2014 no shared words, no #ref"]}],
+const RECAP = {"states": [{"path": ["inc", "hop0", "hop1"], "captions": ["1 \u00b7 The incoming change: Simplify checkout \u2014 send confirmat", "2 \u00b7 Semantic recall matches the governing decision: PR #21 (email Processing)", "3 \u00b7 A typed graph edge reaches the rationale: Issue #13 (duplicate States Incide \u2014 no shared words, no #ref"]}],
   "doneCaption": "The lesson, reconstructed — only graph + semantic memory could make this hop."};
 
 function playTraversal(stateIdx){
