@@ -106,7 +106,7 @@ footer b { color:var(--purple); }
 <span class="ln file">--- a/checkout/views.py</span>
 <span class="ln file">+++ b/checkout/views.py</span>
 <span class="ln hunk">@@ def checkout(request):</span>
-<div class="annot">⛔ <b>Memory conflict:</b> the removed lines undo <b>Issue #8</b> — <i>Tradeoff we accepted, eyes open: we give up the same-transaction guarantee that the mail went out at the instant of purchase. A daily reconciliation sweep…</i></div>
+<div class="annot">⛔ <b>Memory conflict:</b> the removed lines undo <b>PR #57 (synchronous email)</b> — <i>The mail provider call must come off the critical path. The shopper should get an instant reply the moment the purchase is durably recorded; everything the…</i></div>
 <span class="ln ctx">         order = create_order(request.user, request.cart)</span>
 <span class="ln del">-        # hand off email to the background queue</span>
 <span class="ln del">-        send_order_confirmation_task.delay(order.id)</span>
@@ -133,13 +133,13 @@ fewer service to run, easier to reason about.</div>
     <div class="panel">
       <h2>What your organization currently believes</h2>
       <div class="pad">
-        <div class="belief-quote">Tradeoff we accepted, eyes open: we give up the same-transaction guarantee that the mail went out at the instant of purchase. A daily reconciliation sweep resends anything missing older than a few minutes.</div>
-        <div class="kv"><span class="k">This holds only while</span>that a synchronous email confirmation adds delays that could impact user experience during high-traffic times</div>
+        <div class="belief-quote">The mail provider call must come off the critical path. The shopper should get an instant reply the moment the purchase is durably recorded; everything the shopper does not need to wait for (notifying them by mail) happens afterward, out of band, with retry and observability...</div>
+        <div class="kv"><span class="k">This holds only while</span>the mail provider call cost ~800ms on the critical path; shopper conversions fall significantly past 1.2s response time.</div>
         <div class="kv"><span class="k">Reconstructed via</span>
-          <span class="chain">PR #57 (sends email synchronously) -&gt; Issue #8 (latency regression on checkout)</span></div>
+          <span class="chain">PR #57 (simplifies email sending) -&gt; Issue #8 (latency incident)</span></div>
         <div class="kv"><span class="k">Memory impact</span>
-          ⚠️ This PR would <b>supersede</b> Issue #8.</div>
-        <div class="kv"><span class="k">If merged</span>reintroduces latency on the checkout path, potentially decreasing conversion rates during peak traffic periods.</div>
+          ⚠️ This PR would <b>supersede</b> PR #57 (synchronous email).</div>
+        <div class="kv"><span class="k">If merged</span>reintroduces ~800ms of latency to the purchase flow, potentially lowering conversion rates during peak traffic situations.</div>
         <p class="note">no shared keywords, no #ref from this PR — recovered by graph + semantic reasoning</p>
       </div>
     </div>
@@ -160,8 +160,8 @@ fewer service to run, easier to reason about.</div>
 <path id="st0-e-hop0-hop1" class="edge" data-src="hop0" data-dst="hop1" d="M515,270 Q459,176 403,110"/><text class="edge-label" x="459" y="172" text-anchor="middle">justified by</text>
 <path id="st0-e-hop0-cap" class="edge" data-src="hop0" data-dst="cap" d="M515,270 Q459,336 403,430"/><text class="edge-label" x="459" y="332" text-anchor="middle">governs</text>
 <g id="st0-inc" class="node" data-state="0" data-nid="inc"><circle cx="120" cy="270" r="30" fill="#dc2626" stroke="#dc2626" fill-opacity="0.22"/><text x="120" y="232" text-anchor="middle">🔻 Simplify checkout — send confirmat</text><text class="sub" x="120" y="314" text-anchor="middle">incoming</text></g>
-<g id="st0-hop0" class="node" data-state="0" data-nid="hop0"><circle cx="515" cy="270" r="30" fill="#7c3aed" stroke="#7c3aed" fill-opacity="0.22"/><text x="515" y="232" text-anchor="middle">🛡️ PR #57 (sends Email Synchronously)</text><text class="sub" x="515" y="314" text-anchor="middle">decision</text></g>
-<g id="st0-hop1" class="node" data-state="0" data-nid="hop1"><circle cx="403" cy="110" r="22" fill="#16a34a" stroke="#16a34a" fill-opacity="0.22"/><text x="403" y="80" text-anchor="middle">🐛 Issue #8 (latency Regression On Ch</text><text class="sub" x="403" y="146" text-anchor="middle">issue</text></g>
+<g id="st0-hop0" class="node" data-state="0" data-nid="hop0"><circle cx="515" cy="270" r="30" fill="#7c3aed" stroke="#7c3aed" fill-opacity="0.22"/><text x="515" y="232" text-anchor="middle">🛡️ PR #57 (simplifies Email Sending)</text><text class="sub" x="515" y="314" text-anchor="middle">decision</text></g>
+<g id="st0-hop1" class="node" data-state="0" data-nid="hop1"><circle cx="403" cy="110" r="22" fill="#16a34a" stroke="#16a34a" fill-opacity="0.22"/><text x="403" y="80" text-anchor="middle">🐛 Issue #8 (latency Incident)</text><text class="sub" x="403" y="146" text-anchor="middle">issue</text></g>
 <g id="st0-cap" class="node" data-state="0" data-nid="cap"><circle cx="403" cy="430" r="22" fill="#0891b2" stroke="#0891b2" fill-opacity="0.22"/><text x="403" y="400" text-anchor="middle">⚙️ Messaging</text><text class="sub" x="403" y="466" text-anchor="middle">tech</text></g>
 </g>
   </svg>
@@ -175,13 +175,13 @@ recall (Cognee) is what connects them.</p>
 
 
   <details><summary>🔎 How Sentinel reconstructed this</summary>
-  <div class="pad">removes the asynchronous Celery task for sending the confirmation email and adds a synchronous call to send the email directly through SMTP before returning from the checkout function. The MEMORY CONTEXT indicates that previously, email confirmation was handled asynchronously to avoid latency issues during peak traffic, particularly highlighted in Issue #8 where blocking calls caused a drop in purchase completions. The PR contradicts this decision as it changes the flow of sending emails from asynchronous to synchronous, reintroducing the potential for latency regressions specifically during high-traffic events.</div></details>
+  <div class="pad">removes background email task via Celery, adds direct synchronous SMTP email send in the checkout process. The MEMORY CONTEXT emphasized that the mail provider call must come off the critical path due to significant latency causing a drop in purchase completions. The decision was made to simplify the flow and avoid blocking the shopper with pending email notifications.</div></details>
 
   <footer>🛡️ <b>Sentinel</b> — every element on this page is <b>retrieved memory</b>
   (Cognee graph + vector recall), not a re-reading of the diff · remember / recall / improve / forget</footer>
 </div>
 <script>
-const RECAP = {"states": [{"path": ["inc", "hop0", "hop1"], "captions": ["1 \u00b7 The incoming change: Simplify checkout \u2014 send confirmat", "2 \u00b7 Semantic recall matches the governing decision: PR #57 (sends Email Synchronously)", "3 \u00b7 A typed graph edge reaches the rationale: Issue #8 (latency Regression On Ch \u2014 no shared words, no #ref"]}],
+const RECAP = {"states": [{"path": ["inc", "hop0", "hop1"], "captions": ["1 \u00b7 The incoming change: Simplify checkout \u2014 send confirmat", "2 \u00b7 Semantic recall matches the governing decision: PR #57 (simplifies Email Sending)", "3 \u00b7 A typed graph edge reaches the rationale: Issue #8 (latency Incident) \u2014 no shared words, no #ref"]}],
   "doneCaption": "The lesson, reconstructed — only graph + semantic memory could make this hop."};
 
 function playTraversal(stateIdx){
