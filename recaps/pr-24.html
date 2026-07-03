@@ -95,8 +95,8 @@ footer b { color:var(--purple); }
     <div>Throttle the orders &amp; checkout endpoints in the app</div>
     <div class="note">Author: @another-contributor · Branch: throttle-orders → main</div>
     <div class="meter"><span>Confidence in the current belief</span>
-      <span class="track"><span class="fill" style="width:90%"></span></span>
-      <b style="color:var(--fg)">90%</b></div>
+      <span class="track"><span class="fill" style="width:85%"></span></span>
+      <b style="color:var(--fg)">85%</b></div>
   </div>
 
   <div class="grid">
@@ -106,7 +106,7 @@ footer b { color:var(--purple); }
 <span class="ln file">--- a/orders/views.py</span>
 <span class="ln file">+++ b/orders/views.py</span>
 <span class="ln hunk">@@</span>
-<div class="annot">⛔ <b>Memory conflict:</b> the removed lines undo <b>PR #14 (gateway-level rate limiting)</b> — <i>&quot;There must be **exactly one** place that enforces a request budget, and it must be at the edge — the gateway...&quot;</i></div>
+<div class="annot">⛔ <b>Memory conflict:</b> the removed lines undo <b>PR #14 (gateway-level rate limiting)</b> — <i>there must be **exactly one** place that enforces a request budget to avoid inconsistent behavior from overlapping rate-limiting systems</i></div>
 <span class="ln add">+from django_ratelimit.decorators import ratelimit</span>
 <span class="ln add">+</span>
 <span class="ln add">+@ratelimit(key=&quot;user_or_ip&quot;, rate=&quot;20/s&quot;, block=True)</span>
@@ -136,13 +136,13 @@ touching the gateway config, which most of us don&#x27;t have access to.</div>
     <div class="panel">
       <h2>What your organization currently believes</h2>
       <div class="pad">
-        <div class="belief-quote">&quot;There must be **exactly one** place that enforces a request budget, and it must be at the edge — the gateway...&quot;</div>
-        <div class="kv"><span class="k">This holds only while</span>the gateway must enforce a singular rate limit to ensure predictable and fair access to services</div>
+        <div class="belief-quote">there must be **exactly one** place that enforces a request budget to avoid inconsistent behavior from overlapping rate-limiting systems</div>
+        <div class="kv"><span class="k">This holds only while</span>exactly one place that enforces rate limits ensures consistent behavior</div>
         <div class="kv"><span class="k">Reconstructed via</span>
-          <span class="chain">PR #14 (gateway-level rate limiting) -&gt; Issue #6 (the double-counting incident)</span></div>
+          <span class="chain">PR #14 (gateway-level rate limiting) -&gt; Issue #6 (legitimate users throttled)</span></div>
         <div class="kv"><span class="k">Memory impact</span>
           ⚠️ This PR would <b>supersede</b> PR #14 (gateway-level rate limiting).</div>
-        <div class="kv"><span class="k">If merged</span>reintroduces potential double-counting of requests, which can lead to inconsistent request handling and negative latency impacts for legitimate users</div>
+        <div class="kv"><span class="k">If merged</span>reintroduces overlapping rate limiting for `/orders` and `/checkout`, risking inconsistencies and poor performance</div>
         <p class="note">no shared keywords, no #ref from this PR — recovered by graph + semantic reasoning</p>
       </div>
     </div>
@@ -159,17 +159,18 @@ touching the gateway config, which most of us don&#x27;t have access to.</div>
     <defs><marker id="arr" viewBox="0 0 10 10" refX="26" refY="5" markerWidth="7"
       markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#3d444d"/></marker></defs>
     <g class="gstate" data-state="0" style="">
-<path id="st0-e-__incoming__-fe46352e-a7b7-570e-a4df-8a8214921f6a" class="edge" data-src="__incoming__" data-dst="fe46352e-a7b7-570e-a4df-8a8214921f6a" d="M120,270 Q317,256 515,270"/><text class="edge-label" x="317" y="252" text-anchor="middle">reverses</text>
-<path id="st0-e-d32f5aae-a973-5a1a-adbd-c0345c140823-fe46352e-a7b7-570e-a4df-8a8214921f6a" class="edge" data-src="d32f5aae-a973-5a1a-adbd-c0345c140823" data-dst="fe46352e-a7b7-570e-a4df-8a8214921f6a" d="M403,110 Q459,176 515,270"/><text class="edge-label" x="459" y="172" text-anchor="middle">resolved by</text>
-<path id="st0-e-d32f5aae-a973-5a1a-adbd-c0345c140823-55d2cd50-823c-5358-a1c7-cb91c35e1650" class="edge" data-src="d32f5aae-a973-5a1a-adbd-c0345c140823" data-dst="55d2cd50-823c-5358-a1c7-cb91c35e1650" d="M403,110 Q532,111 661,140"/><text class="edge-label" x="532" y="107" text-anchor="middle">created by</text>
-<path id="st0-e-d32f5aae-a973-5a1a-adbd-c0345c140823-94564128-a5e3-5ffa-9aa9-4e6bf5a8a38e" class="edge" data-src="d32f5aae-a973-5a1a-adbd-c0345c140823" data-dst="94564128-a5e3-5ffa-9aa9-4e6bf5a8a38e" d="M403,110 Q532,241 661,400"/><text class="edge-label" x="532" y="237" text-anchor="middle">involves</text>
-<path id="st0-e-d32f5aae-a973-5a1a-adbd-c0345c140823-0be77ef2-49a2-5a74-895d-bd08345b4e9a" class="edge" data-src="d32f5aae-a973-5a1a-adbd-c0345c140823" data-dst="0be77ef2-49a2-5a74-895d-bd08345b4e9a" d="M403,110 Q403,256 403,430"/><text class="edge-label" x="403" y="252" text-anchor="middle">has label</text>
+<path id="st0-e-__incoming__-04443bb5-9d17-50b2-9bcb-c85587b61873" class="edge" data-src="__incoming__" data-dst="04443bb5-9d17-50b2-9bcb-c85587b61873" d="M120,270 Q317,256 515,270"/><text class="edge-label" x="317" y="252" text-anchor="middle">reverses</text>
+<path id="st0-e-1906ffef-40b6-50bb-b427-5cbb0862cf25-04443bb5-9d17-50b2-9bcb-c85587b61873" class="edge" data-src="1906ffef-40b6-50bb-b427-5cbb0862cf25" data-dst="04443bb5-9d17-50b2-9bcb-c85587b61873" d="M403,110 Q459,176 515,270"/><text class="edge-label" x="459" y="172" text-anchor="middle">resolved by</text>
+<path id="st0-e-55d2cd50-823c-5358-a1c7-cb91c35e1650-1906ffef-40b6-50bb-b427-5cbb0862cf25" class="edge" data-src="55d2cd50-823c-5358-a1c7-cb91c35e1650" data-dst="1906ffef-40b6-50bb-b427-5cbb0862cf25" d="M661,140 Q532,111 403,110"/><text class="edge-label" x="532" y="107" text-anchor="middle">created</text>
+<path id="st0-e-1906ffef-40b6-50bb-b427-5cbb0862cf25-94564128-a5e3-5ffa-9aa9-4e6bf5a8a38e" class="edge" data-src="1906ffef-40b6-50bb-b427-5cbb0862cf25" data-dst="94564128-a5e3-5ffa-9aa9-4e6bf5a8a38e" d="M403,110 Q532,241 661,400"/><text class="edge-label" x="532" y="237" text-anchor="middle">discusses</text>
+<path id="st0-e-1906ffef-40b6-50bb-b427-5cbb0862cf25-d1b873d1-8211-5db9-b2f3-04866531e202" class="edge" data-src="1906ffef-40b6-50bb-b427-5cbb0862cf25" data-dst="d1b873d1-8211-5db9-b2f3-04866531e202" d="M403,110 Q403,256 403,430"/><text class="edge-label" x="403" y="252" text-anchor="middle">concerns</text>
+<path id="st0-e-d1b873d1-8211-5db9-b2f3-04866531e202-94564128-a5e3-5ffa-9aa9-4e6bf5a8a38e" class="edge" data-src="d1b873d1-8211-5db9-b2f3-04866531e202" data-dst="94564128-a5e3-5ffa-9aa9-4e6bf5a8a38e" d="M403,430 Q532,401 661,400"/><text class="edge-label" x="532" y="397" text-anchor="middle">implemented in</text>
 <g id="st0-__incoming__" class="node" data-state="0" data-nid="__incoming__"><circle cx="120" cy="270" r="30" fill="#dc2626" stroke="#dc2626" fill-opacity="0.22"/><text x="120" y="232" text-anchor="middle">🔻 Throttle the orders &amp; checkout end</text><text class="sub" x="120" y="314" text-anchor="middle">incoming</text></g>
-<g id="st0-fe46352e-a7b7-570e-a4df-8a8214921f6a" class="node" data-state="0" data-nid="fe46352e-a7b7-570e-a4df-8a8214921f6a"><circle cx="515" cy="270" r="30" fill="#7c3aed" stroke="#7c3aed" fill-opacity="0.22"/><text x="515" y="232" text-anchor="middle">🛡️ PR #14</text><text class="sub" x="515" y="314" text-anchor="middle">decision</text></g>
-<g id="st0-d32f5aae-a973-5a1a-adbd-c0345c140823" class="node" data-state="0" data-nid="d32f5aae-a973-5a1a-adbd-c0345c140823"><circle cx="403" cy="110" r="22" fill="#16a34a" stroke="#16a34a" fill-opacity="0.22"/><text x="403" y="80" text-anchor="middle">🐛 Issue #6: Legitimate Users Throttl</text><text class="sub" x="403" y="146" text-anchor="middle">issue</text></g>
+<g id="st0-04443bb5-9d17-50b2-9bcb-c85587b61873" class="node" data-state="0" data-nid="04443bb5-9d17-50b2-9bcb-c85587b61873"><circle cx="515" cy="270" r="30" fill="#7c3aed" stroke="#7c3aed" fill-opacity="0.22"/><text x="515" y="232" text-anchor="middle">🛡️ PR #14</text><text class="sub" x="515" y="314" text-anchor="middle">decision</text></g>
+<g id="st0-1906ffef-40b6-50bb-b427-5cbb0862cf25" class="node" data-state="0" data-nid="1906ffef-40b6-50bb-b427-5cbb0862cf25"><circle cx="403" cy="110" r="22" fill="#16a34a" stroke="#16a34a" fill-opacity="0.22"/><text x="403" y="80" text-anchor="middle">🐛 Issue #6</text><text class="sub" x="403" y="146" text-anchor="middle">issue</text></g>
 <g id="st0-55d2cd50-823c-5358-a1c7-cb91c35e1650" class="node" data-state="0" data-nid="55d2cd50-823c-5358-a1c7-cb91c35e1650"><circle cx="661" cy="140" r="22" fill="#f59e0b" stroke="#f59e0b" fill-opacity="0.22"/><text x="661" y="110" text-anchor="middle">👤 Notchayan</text><text class="sub" x="661" y="176" text-anchor="middle">person</text></g>
 <g id="st0-94564128-a5e3-5ffa-9aa9-4e6bf5a8a38e" class="node" data-state="0" data-nid="94564128-a5e3-5ffa-9aa9-4e6bf5a8a38e"><circle cx="661" cy="400" r="22" fill="#0891b2" stroke="#0891b2" fill-opacity="0.22"/><text x="661" y="370" text-anchor="middle">⚙️ Api_gateway</text><text class="sub" x="661" y="436" text-anchor="middle">tech</text></g>
-<g id="st0-0be77ef2-49a2-5a74-895d-bd08345b4e9a" class="node" data-state="0" data-nid="0be77ef2-49a2-5a74-895d-bd08345b4e9a"><circle cx="403" cy="430" r="22" fill="#0891b2" stroke="#0891b2" fill-opacity="0.22"/><text x="403" y="400" text-anchor="middle">⚙️ Incident</text><text class="sub" x="403" y="466" text-anchor="middle">tech</text></g>
+<g id="st0-d1b873d1-8211-5db9-b2f3-04866531e202" class="node" data-state="0" data-nid="d1b873d1-8211-5db9-b2f3-04866531e202"><circle cx="403" cy="430" r="22" fill="#0891b2" stroke="#0891b2" fill-opacity="0.22"/><text x="403" y="400" text-anchor="middle">⚙️ Rate Limiting</text><text class="sub" x="403" y="466" text-anchor="middle">tech</text></g>
 </g>
   </svg>
   <div class="caption" id="cap-0"></div>
@@ -182,13 +183,13 @@ recall (Cognee) is what connects them.</p>
 
 
   <details><summary>🔎 How Sentinel reconstructed this</summary>
-  <div class="pad">removes gateway-level rate limiting, adds application-side DRF throttle classes on the orders and checkout endpoints. The PR introduces throttling back to the application layer instead of enforcing it at the gateway as previously decided. The MEMORY CONTEXT decided on gateway-level rate limiting in PR #14 to avoid issues with overlapping rate limits and ensure a single enforcement point. This PR contradicts that decision by moving throttling to the application, which is not aligned with the original reasoning. Therefore, the effect of this PR is to undo the decision to limit at the gateway and re-introduce application-level rate limits.</div></details>
+  <div class="pad">removes the application-level throttling with decorators and adds gateway-level rate limiting; the MEMORY CONTEXT decided to enforce rate limiting at the gateway level in PR #14 to avoid multiple overlapping systems. The PR adds a different layer of rate limiting in the application code, which goes against the decision to keep throttling in a single location.</div></details>
 
   <footer>🛡️ <b>Sentinel</b> — every element on this page is <b>retrieved memory</b>
   (Cognee graph + vector recall), not a re-reading of the diff · remember / recall / improve / forget</footer>
 </div>
 <script>
-const RECAP = {"states": [{"path": ["__incoming__", "fe46352e-a7b7-570e-a4df-8a8214921f6a", "d32f5aae-a973-5a1a-adbd-c0345c140823"], "captions": ["1 \u00b7 The incoming change: Throttle the orders & checkout end", "2 \u00b7 Semantic recall matches the governing decision: PR #14", "3 \u00b7 A typed graph edge reaches the rationale: Issue #6: Legitimate Users Throttl \u2014 no shared words, no #ref"]}],
+const RECAP = {"states": [{"path": ["__incoming__", "04443bb5-9d17-50b2-9bcb-c85587b61873", "1906ffef-40b6-50bb-b427-5cbb0862cf25"], "captions": ["1 \u00b7 The incoming change: Throttle the orders & checkout end", "2 \u00b7 Semantic recall matches the governing decision: PR #14", "3 \u00b7 A typed graph edge reaches the rationale: Issue #6 \u2014 no shared words, no #ref"]}],
   "doneCaption": "The lesson, reconstructed — only graph + semantic memory could make this hop."};
 
 function playTraversal(stateIdx){
