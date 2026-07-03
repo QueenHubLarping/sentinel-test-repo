@@ -6,5 +6,13 @@
       "eb3c65c5-6271-537c-9b60-3a374d3d030e"
     ],
     "retired_at": "2026-07-03T19:03:35+00:00"
+  },
+  {
+    "decision_reference": "PR #57",
+    "pr_number": 57,
+    "data_ids": [
+      "27914e0d-f68a-5ca4-a0bf-cf26609632cc"
+    ],
+    "retired_at": "2026-07-03T19:23:47+00:00"
   }
 ]
